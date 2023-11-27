@@ -7,14 +7,8 @@ import {
   TouchableOpacity,
   ImageBackground,
 } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Chat from "./components/Chat";
-import Start from "./components/Start";
 
-const Stack = createNativeStackNavigator();
-
-export default function App() {
+const Start = ({ navigation }) => {
   const [text, setText] = useState("");
 
   return (
@@ -60,7 +54,7 @@ export default function App() {
       </ImageBackground>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -137,3 +131,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#757083",
   },
 });
+
+export default Start;
