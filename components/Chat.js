@@ -1,13 +1,19 @@
-import { StyleSheet, View, Text, Button } from "react-native";
+import { useState, useEffect } from "react";
+import { StyleSheet, View, Text } from "react-native";
 
-const Chat = ({ navigation }) => {
+const Chat = ({ route, navigation }) => {
+  const [backgroundColor, setBackgroundColor] = useState("");
+
+  const { name, backColor } = route.params;
+
+  useEffect(() => {
+    navigation.setOptions({ title: name });
+    setBackgroundColor(backColor);
+  }, []);
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} backgroundColor={backgroundColor}>
       <Text>WC to the Chat!</Text>
-      <Button
-        title="Go to Screen 2"
-        onPress={() => navigation.navigate("Start")}
-      />
     </View>
   );
 };
@@ -20,4 +26,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Screen1;
+export default Chat;

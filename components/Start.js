@@ -9,12 +9,13 @@ import {
 } from "react-native";
 
 const Start = ({ navigation }) => {
-  const [text, setText] = useState("");
+  const [name, setName] = useState("");
+  const [backColor, setBackColor] = useState("#090C08");
 
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require("./assets/Background_Image.png")}
+        source={require("./../assets/Background_Image.png")}
         resizeMode="cover"
         style={styles.image}
       >
@@ -22,8 +23,8 @@ const Start = ({ navigation }) => {
 
         <View style={styles.navBackground}>
           <TextInput
-            value={text}
-            onChangeText={setText}
+            value={name}
+            onChangeText={setName}
             placeholder="Your Name"
             style={styles.textInput}
           />
@@ -31,20 +32,32 @@ const Start = ({ navigation }) => {
           <View style={styles.colorContainer}>
             <TouchableOpacity
               style={[styles.coloredButton, styles.blackButton]}
+              onPress={() => {
+                setBackColor("#090C08");
+              }}
             ></TouchableOpacity>
             <TouchableOpacity
               style={[styles.coloredButton, styles.purpleButton]}
+              onPress={() => {
+                setBackColor("#474056");
+              }}
             ></TouchableOpacity>
             <TouchableOpacity
               style={[styles.coloredButton, styles.lightblueButton]}
+              onPress={() => {
+                setBackColor("#8A95A5");
+              }}
             ></TouchableOpacity>
             <TouchableOpacity
               style={[styles.coloredButton, styles.ligthgreenButton]}
+              onPress={() => {
+                setBackColor("#B9C6AE");
+              }}
             ></TouchableOpacity>
           </View>
           <TouchableOpacity
             onPress={() => {
-              () => {};
+              navigation.navigate("Chat", { name: name, backColor: backColor });
             }}
             style={styles.chattingButton}
           >
