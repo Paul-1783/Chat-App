@@ -3,16 +3,20 @@ import {
   StyleSheet,
   Text,
   View,
+  Alert,
   TextInput,
   TouchableOpacity,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const Start = ({ navigation }) => {
   const [name, setName] = useState("");
   const [backColor, setBackColor] = useState("#090C08");
+
+  const auth = getAuth();
 
   return (
     <View style={styles.container}>
@@ -59,7 +63,25 @@ const Start = ({ navigation }) => {
           </View>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("Chat", { name: name, backColor: backColor });
+              signInAnonymously(auth)
+                .then((result) => {
+                  // Signed in..
+                  Alert.alert("Signin was successful.");
+                  navigation.navigate("Chat", {
+                    name: name,
+                    backColor: backColor,
+                    uid: result.user.uid,
+                  });
+                })
+                .catch((error) => {
+                  const errorCode = error.code;
+                  const errorMessage = error.message;
+                  Alert.alert(
+                    "Errorcode: ",
+                    errorCode + " Errormessage: ",
+                    errorMessage
+                  );
+                });
             }}
             style={styles.chattingButton}
           >
