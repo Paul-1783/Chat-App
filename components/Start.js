@@ -84,6 +84,9 @@ const Start = ({ navigation }) => {
                 });
             }}
             style={styles.chattingButton}
+            accessibilityLabel="chat"
+            accessibilityHint="By pushing the button you will be led to the chat screen."
+            accessibilityRole="button"
           >
             <Text style={styles.chatButtonText}>Start Chatting</Text>
           </TouchableOpacity>

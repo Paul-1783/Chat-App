@@ -5,6 +5,7 @@ import Chat from "./components/Chat";
 import Start from "./components/Start";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,12 +21,13 @@ export default function App() {
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const storage = getStorage(app);
 
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Start">
         <Stack.Screen name="Chat">
-          {(props) => <Chat db={db} {...props} />}
+          {(props) => <Chat db={db} storage={storage} {...props} />}
         </Stack.Screen>
         <Stack.Screen name="Start" component={Start} />
       </Stack.Navigator>

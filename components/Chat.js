@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from "react-native";
 import { Bubble, GiftedChat } from "react-native-gifted-chat";
+import MapView from "react-native-maps";
 import {
   collection,
   addDoc,
@@ -8,8 +9,9 @@ import {
   orderBy,
   onSnapshot,
 } from "firebase/firestore";
+import CustomActions from "./CustomActions";
 
-const Chat = ({ db, route, navigation }) => {
+const Chat = ({ db, route, navigation, storage }) => {
   const [backgroundColor, setBackgroundColor] = useState("");
   const { name, backColor, uid } = route.params;
   const [messages, setMessages] = useState([]);
@@ -18,14 +20,6 @@ const Chat = ({ db, route, navigation }) => {
     addDoc(collection(db, "messages"), newMessages[0]);
   };
 
-  const addMessage = async (message) => {
-    const newListRef = await addDoc(collection(db, ""), message);
-    if (newListRef.id) {
-      setMessages([message, ...messages]);
-    } else {
-      Alert.alert("Unable to add. Please try later");
-    }
-  };
   useEffect(() => {
     navigation.setOptions({ title: name });
     setBackgroundColor(backColor);
@@ -64,16 +58,42 @@ const Chat = ({ db, route, navigation }) => {
     );
   };
 
+  const renderCustomActions = (props) => {
+    return (
+      <CustomActions onSend={onSend} storage={storage} uid={uid} {...props} />
+    );
+  };
+
+  const renderCustomView = (props) => {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   return (
     <View style={styles.container} backgroundColor={backgroundColor}>
       <GiftedChat
         messages={messages}
         renderBubble={renderBubble}
         onSend={(messages) => onSend(messages)}
+        renderCustomView={renderCustomView}
         user={{
           _id: uid,
           name: name,
         }}
+        renderActions={renderCustomActions}
       />
       {Platform.OS === "android" ? (
         <KeyboardAvoidingView behavior="height" />
