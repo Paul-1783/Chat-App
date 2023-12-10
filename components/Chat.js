@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from "react-native";
-import { Bubble, GiftedChat } from "react-native-gifted-chat";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import {
   collection,
   addDoc,
@@ -9,7 +10,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
-const Chat = ({ db, route, navigation }) => {
+const Chat = ({ db, route, navigation, isConnected }) => {
   const [backgroundColor, setBackgroundColor] = useState("");
   const { name, backColor, uid } = route.params;
   const [messages, setMessages] = useState([]);
@@ -18,35 +19,48 @@ const Chat = ({ db, route, navigation }) => {
     addDoc(collection(db, "messages"), newMessages[0]);
   };
 
-  const addMessage = async (message) => {
-    const newListRef = await addDoc(collection(db, ""), message);
-    if (newListRef.id) {
-      setMessages([message, ...messages]);
-    } else {
-      Alert.alert("Unable to add. Please try later");
+  const loadCachedLists = async () => {
+    const cachedLists = (await AsyncStorage.getItem("messages")) || [];
+    setLists(JSON.parse(cachedLists));
+  };
+
+  const cacheShoppingLists = async (listsToCache) => {
+    try {
+      await AsyncStorage.setItem("messages", JSON.stringify(listsToCache));
+    } catch (error) {
+      console.log(error.message);
     }
   };
+
+  let unsubMessages;
+
   useEffect(() => {
-    navigation.setOptions({ title: name });
-    setBackgroundColor(backColor);
-    const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-    const unsubMessages = onSnapshot(q, (documentsSnapshot) => {
-      let newMessages = [];
-      documentsSnapshot.forEach((doc) => {
-        newMessages.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: new Date(doc.data().createdAt.toMillis()),
+    if (isConnected === true) {
+      if (unsubMessages) unsubMessages();
+      unsubMessages = null;
+
+      navigation.setOptions({ title: name });
+      setBackgroundColor(backColor);
+      const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+      unsubMessages = onSnapshot(q, (documentsSnapshot) => {
+        let newMessages = [];
+        documentsSnapshot.forEach((doc) => {
+          newMessages.push({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: new Date(doc.data().createdAt.toMillis()),
+          });
         });
+        cacheShoppingLists(newMessages);
+        setMessages(newMessages);
       });
-      setMessages(newMessages);
-    });
+    } else loadCachedLists();
 
     // Clean up code
     return () => {
       if (unsubMessages) unsubMessages();
     };
-  }, []);
+  }, [isConnected]);
 
   const renderBubble = (props) => {
     return (
@@ -64,11 +78,17 @@ const Chat = ({ db, route, navigation }) => {
     );
   };
 
+  const renderInputToolbar = (props) => {
+    if (isConnected) return <InputToolbar {...props} />;
+    else return null;
+  };
+
   return (
     <View style={styles.container} backgroundColor={backgroundColor}>
       <GiftedChat
         messages={messages}
         renderBubble={renderBubble}
+        renderInputToolbar={renderInputToolbar}
         onSend={(messages) => onSend(messages)}
         user={{
           _id: uid,
